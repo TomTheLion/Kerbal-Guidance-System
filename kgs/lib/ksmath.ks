@@ -4,15 +4,15 @@
 // math function library
 //
 
-// returns solution to linear equation Ax=b solved by the gauss jordan algorithm
+// returns solution to linear system Ax=b solved by the gauss jordan algorithm
 function gauss_jordan {
     
-    parameter abi.
+    parameter abi.	// list of the rows of A (as lists) with the values of b for each row appended
 
     local ab is deep_copy(abi).
     local n is ab:length.
 	
-    // guassian elimination with partial pivoting
+    // gaussian elimination with partial pivoting
     for row in range(n - 1) {
         // select the row with the largest pivot
 		local pivot_row is row.
@@ -32,8 +32,7 @@ function gauss_jordan {
 			set ab[row] to temp.
 		}
 		
-        // eliminate values below the pivot, only values not in the pivot
-        // column are actually changed
+        // eliminate values below the pivot, only values not in the pivot column are actually changed
         for i in range(row + 1, n) {
 			local m is ab[i][row] / pivot_value.	
             for j in range(row + 1, n + 1) {
@@ -42,8 +41,8 @@ function gauss_jordan {
 		}
 	}
 
-    // elimate values above the pivots to reach reduced row echelon form, only
-    // the values in the last column are actually changed
+    // elimate values above the pivots to reach reduced row echelon form, only the
+	// values in the last column are actually changed
     for row in range(n - 1, -1)	{
 		set ab[row][n] to ab[row][n] / ab[row][row].
         for i in range(row - 1, -1) {
@@ -60,16 +59,15 @@ function gauss_jordan {
 	return x.
 }
 
-// returns solution to linear equation Ax=b solved by a gauss jordan algorithm, if
-// system is overdetermined returns minimum norm solution
+// returns solution to linear system Ax=b solved by a gauss jordan algorithm,
+// if system is overdetermined returns minimum norm solution
 function matrix_solve {
 
-	parameter n.
-	parameter m.
-	parameter ab.
+	parameter m.	// number of rows
+	parameter n.	// number of columns
+	parameter ab.	// list of the rows of A (as lists) with the values of b for each row appended
 
-	// if n > m calculate minimum norm (w = (AA^T)^-1 b, x = A^T w) otherwise solve
-	// directly (x = A^-1 b)
+	// if n > m calculate minimum norm (w = (AA^T)^-1 b, x = A^T w) otherwise solve directly (x = A^-1 b)
 	if n > m {
 		// calculate AA^T with b appended
 		local aatb is list().
@@ -106,16 +104,16 @@ function matrix_solve {
 	}
 }
 
-// solves for the root of a multivariate non linear problem using newton's method
+// returns root of a multivariate non linear problem using newton's method
 function newton {
 
-	parameter fdf_function.
-	parameter xi.
-	parameter p.
-	parameter eps.
-	parameter debug_function is 0.
+	parameter fdf_function.			// function that returns list of the rows of the jacobian (as lists) with the values of the error vector for each row appended
+	parameter xi.					// initial guess for the solution
+	parameter p.					// parameters required by fdf_function
+	parameter eps.					// error tolerance
+	parameter debug_function is 0.	// function called on each iteration
 
-	// calculate first jacobian matrix and error vector, then solve for dx
+	// calculate jacobian and error vector, then solve for solution update increment (dx)
 	local x is xi:copy.
     local x_new is xi:copy.
     local fdf is fdf_function(x, p).
@@ -135,7 +133,6 @@ function newton {
 
 	// iteration loop
 	local iteration is 0.
-
 	until false {
 		set iteration to iteration + 1.
 
@@ -157,10 +154,10 @@ function newton {
 			return list(x, iteration, fmax).
 		}
 
-		// calculate new jacobian matrix and error vector
+		// update jacobian and error vector
         set fdf to fdf_function(x_new, p).
 
-		// calculate new max error
+		// update max error
         set fmax_new to 0.0.
 		for i in range(m) {
 			set fmax_new to max(fmax_new, abs(fdf[i][n])).

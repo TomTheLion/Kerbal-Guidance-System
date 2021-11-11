@@ -4,18 +4,18 @@
 // guidance functions
 //
 
-global guidance_command is list(lookdirup(ship:facing:forevector, ship:facing:topvector), 1).
-
+// set initial guidance
+global guidance_command is list(lookdirup(ship:up:vector, ship:facing:topvector), 1).
 lock steering to guidance_command[0].
 lock throttle to guidance_command[1].
 
-// main guidance function that calculates attitude, roll, and throttle
+// main guidance function, begin with open loop guidance, then closed loop guidance, and finally terminal guidance
 function guidance {
 
+	// until timed event "activate guidance" determine pitch, roll, and heading from open loop guidance parameters
 	if not kgs_data:clg:active_guidance {
-		// open loop guidance mode
-		
-		// initialize variables
+
+		// set mission elapsed and initialize command variable
 		local met is time:seconds - kgs_data:olg:launch_time.
 		local command is lexicon().
 		
@@ -31,34 +31,34 @@ function guidance {
 			).
 			set aoa to max(0, min(aoa, kgs_data:olg:pitch_aoa)).
 			set command:look_at to heading(kgs_data:olg:launch_azimuth, 90 - vang(ship:up:vector, ship:velocity:surface) - aoa):vector.
-			set command:look_up to up:vector * angleaxis(kgs_data:olg:roll_angle, command:look_at).
+			set command:look_up to ship:up:vector * angleaxis(kgs_data:olg:roll_angle, command:look_at).
 		}
 		else {
 			// before pitch time pitch is zero
-			set command:look_at to ship:facing:forevector.
+			set command:look_at to ship:up:vector.
 			
 			if roll_flag {
-				// after roll time set roll to desired value
+				// after roll time set roll to specified value
 				set command:look_up to heading(kgs_data:olg:roll_angle + kgs_data:olg:launch_azimuth + 180, 0, 0):vector.
 			}
 			else {
-				// before roll time set roll to initial value
+				// before roll time set roll to current value
 				set command:look_up to ship:facing:topvector.
 			}
 		}
 		
-		// set throttle
+		// set throttle to specified value
 		set command:throttle to kgs_data:olg:throttle.
 		
 		set guidance_command to list(lookdirup(command:look_at, command:look_up), command:throttle).
 	}
 	else {
-		// closed loop guidance mode
 		if not kgs_data:clg:staging and not kgs_data:clg:terminal_guidance {
 			// update guidance unless vehicle is staging or during terminal guidance
 			update_state().
 			update_guidance().
 
+			// reduce timewarp as tgo approaches zero
 			local delta_time is kgs_data:clg:time - kgs_data:clg:time_prev.
 			
 			if get_tgo() < 30 + delta_time and kuniverse:timewarp:rate > 3 {
@@ -73,8 +73,8 @@ function guidance {
 				kuniverse:timewarp:cancelwarp.
 			}
 							
+			// if tgo is less than 10s start terminal guidance
 			if get_tgo() < 10 {
-				// if tgo is less than threshold start terminal guidance
 				set kgs_data:clg:time_prev to time:seconds.
 				set kgs_data:clg:time_final to kgs_data:clg:time_guide + kgs_data:clg:x_guide[6] * kgs_data:scale:time.
 				set kgs_data:clg:terminal_guidance to true.
@@ -86,14 +86,17 @@ function guidance {
 			set kgs_data:clg:time_prev to time:seconds.
 			local tgo is kgs_data:clg:time_final - (time:seconds + delta_time).
 			
+			// set guidance
 			local look_at is get_attitude().
-			local look_up is up:vector * angleaxis(kgs_data:olg:roll_angle, look_at).
+			local look_up is ship:up:vector * angleaxis(kgs_data:olg:roll_angle, look_at).
 			set guidance_command to list(lookdirup(look_at, look_up), get_throttle()).
 			
+			// pause ui refresh as tgo approaches zero
 			if tgo < kgs_settings:ui_refresh_rate {
 				set kgs_data:clg:stop_ui to true.
 			}
 			
+			// stop guidance and refresh ui
 			if tgo < 0 {
 				lock throttle to 0.
 				set kgs_data:clg:stop_guidance to true.
@@ -103,7 +106,7 @@ function guidance {
 	}
 }
 
-// sets up guidance and creates initial guess for solution
+// adds closed loop guidance events to guided stages and generates initial guess for guidance solution
 function initialize_closed_loop_guidance {
 	
 	// intialize state variables
@@ -114,7 +117,7 @@ function initialize_closed_loop_guidance {
 	local mi is ship:mass * 1000.
     local a_thrust is kgs_data:stages[0]:thrust / mi.
 		
-	// calculate time to reach guess for vgo
+	// estimate burn time required to reach desired velocity
 	local vgo is 1.2 * (1 - v_ship:mag).
 	local tgo is time_to_delta_v(kgs_data:stages, vgo, mi).
 	
@@ -243,7 +246,6 @@ function initialize_closed_loop_guidance {
     set kgs_data:clg:time_prev to t.
 
 	// set automatic stage and guidance trigger
-
 	if kgs_data:stages:length > 1 {
 		set_stage_trigger().
 	}
@@ -345,7 +347,7 @@ function set_guidance_trigger {
 		if not kgs_data:clg:terminal_guidance {
 			// calculate and set guidance command
 			local look_at is get_attitude().
-			local look_up is up:vector * angleaxis(kgs_data:olg:roll_angle, look_at).
+			local look_up is ship:up:vector * angleaxis(kgs_data:olg:roll_angle, look_at).
 			set guidance_command to list(lookdirup(look_at, look_up), get_throttle()).
 			set_guidance_trigger().
 		}
@@ -354,8 +356,7 @@ function set_guidance_trigger {
 
 // updates state in data lexicon
 function update_state {
-	
-	// update state
+
 	if kgs_data:clg:mode = 2 {
 		set kgs_data:clg:node_d to swap_yz(solarprimevector * angleaxis(-kgs_inputs:objective:lan, v(0, 1, 0))):normalized.
 	}
@@ -675,7 +676,7 @@ function jacobian_function {
 		).
 		
 		// set auxiliary constraint derivative and error
-		set fdf[5] to list(
+		set fdf[4] to list(
 			vdot(d_sigma_d_lambda_i[0], hf) + vdot(sigma, vcrs(-vf, yf[ 0 + 3]) + vcrs(rf, yf[ 1 + 3])),
 			vdot(d_sigma_d_lambda_i[1], hf) + vdot(sigma, vcrs(-vf, yf[ 2 + 3]) + vcrs(rf, yf[ 3 + 3])),
 			vdot(d_sigma_d_lambda_i[2], hf) + vdot(sigma, vcrs(-vf, yf[ 4 + 3]) + vcrs(rf, yf[ 5 + 3])),
@@ -689,7 +690,7 @@ function jacobian_function {
 	
 	if p:clg:mode = 1 {
 		// set auxiliary constraint derivative and error
-		set fdf[4] to list(
+		set fdf[5] to list(
 			d_sigma_d_lambda_i[0]:z,
 			d_sigma_d_lambda_i[1]:z,
 			d_sigma_d_lambda_i[2]:z,
@@ -705,7 +706,7 @@ function jacobian_function {
 		// set node vector constraint derivative and error	
 		local d_lan_d_r is vcrs(vf, kgs_data:clg:node_d).
 		local d_lan_d_v is vcrs(kgs_data:clg:node_d, rf).
-		set fdf[4] to list(
+		set fdf[5] to list(
 			vdot(d_lan_d_r, yf[0 + 3]) + vdot(d_lan_d_v, yf[1 + 3]),
 			vdot(d_lan_d_r, yf[2 + 3]) + vdot(d_lan_d_v, yf[3 + 3]),
 			vdot(d_lan_d_r, yf[4 + 3]) + vdot(d_lan_d_v, yf[5 + 3]),
@@ -788,7 +789,7 @@ function get_throttle {
 function settle {
 
 	local look_at is ship:prograde:vector.
-	local look_up is up:vector * angleaxis(kgs_data:olg:roll_angle, look_at).
+	local look_up is ship:up:vector * angleaxis(kgs_data:olg:roll_angle, look_at).
 	set guidance_command to list(lookdirup(look_at, look_up), 0).
 
 	if vang(ship:prograde:vector, ship:facing:vector) < 1 and ship:angularvel:mag < 0.02 {

@@ -25,7 +25,7 @@ warp_to_launch_time().
 
 // main guidance loop
 until abort or kgs_data:clg:stop_guidance {
-    guidance().	
+    guidance().
     wait 0.
 }
 
