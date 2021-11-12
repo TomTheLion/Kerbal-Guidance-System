@@ -9,7 +9,7 @@ function create_ui {
 	
 	clearscreen.
 
-	// set terminal size
+	// set terminal size, increase size based on debug level
 	if kgs_settings:debug_level > 2 {
 		set terminal:width to 130.
 		set terminal:height to 60.

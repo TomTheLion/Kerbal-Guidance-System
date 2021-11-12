@@ -1,15 +1,15 @@
 @lazyglobal off.
 
 //
-// functions for manipulation of kOS data structures
+// kOS data structure manipulation library
 //
 
 // format error string for undefined variable and crash program
 function require_variable {
 
-	parameter is_defined.
-	parameter var_desc.
-	parameter var_name.
+	parameter is_defined.	// true/false if variable is defined
+	parameter var_desc.		// variable description
+	parameter var_name.		// variable name
 	
 	if not is_defined {
 		crash("Required " + var_desc + " " + char(34) + var_name + char(34) + " not found.").
@@ -19,9 +19,9 @@ function require_variable {
 // if key is not in lexicon crash program
 function require_key {
 
-	parameter a.
-	parameter key.
-	parameter message is "".
+	parameter a.				// lexicon to search
+	parameter key.				// key to search for
+	parameter message is "".	// optional message to append
 	
 	if not a:haskey(key) {
 		crash("Required key " + char(34) + key + char(34) + " not found" + message + ".").
@@ -31,9 +31,9 @@ function require_key {
 // if list of keys are not in lexicon crash program
 function require_keys {
 
-	parameter a.
-	parameter keys.
-	parameter message is "".
+	parameter a.				// lexicon to search
+	parameter keys.				// keys to search for
+	parameter message is "".	// optional message to append
 	
 	for key in keys {
 		require_key(a, key, message).
@@ -43,9 +43,9 @@ function require_keys {
 // add list of key value pairs from one lexicon to another
 function add_keys {
 	
-	parameter a.
-	parameter b.
-	parameter keys.
+	parameter a.	// lexicon to add to
+	parameter b.	// lexicon to add from
+	parameter keys.	// keys to add
 	
 	for key in keys {
 		require_key(b, key).
@@ -56,9 +56,9 @@ function add_keys {
 // add list of key value pairs from one lexicon to another if they exist
 function add_keys_if {
 	
-	parameter a.
-	parameter b.
-	parameter keys.
+	parameter a.	// lexicon to add to
+	parameter b.	// lexicon to add from
+	parameter keys.	// keys to add
 	
 	for key in keys {
 		if b:haskey(key) {
@@ -70,10 +70,10 @@ function add_keys_if {
 // add list of key value pairs from one lexicon to another if they exist, if they do not exist add specified pair
 function add_keys_if_else {
 	
-	parameter a.
-	parameter b.
-	parameter keys.
-	parameter values.
+	parameter a.		// lexicon to add to
+	parameter b.		// lexicon to add from
+	parameter keys.		// keys to add
+	parameter values.	// values to add
 	
 	for i in range(keys:length) {
 		local key is keys[i].
@@ -90,8 +90,8 @@ function add_keys_if_else {
 // check if value is in list, return true of false
 function in_list {
 
-	parameter a.
-	parameter b.
+	parameter a.	// value to search for
+	parameter b.	// list to search from
 
 	for i in range(b:length){
 		if a = b[i] {
@@ -105,7 +105,7 @@ function in_list {
 // returns a deep copy of a list
 function deep_copy_list {
 	
-    parameter a.
+    parameter a.	// list to copy
 
 	local b is list().
 	for i in range(a:length) {
@@ -129,7 +129,7 @@ function deep_copy_list {
 // returns a deep copy of a lexicon
 function deep_copy_lexicon {
 	
-    parameter a.
+    parameter a.	// lexicon to copy
 
 	local b is lexicon().
 	for key in a:keys {
@@ -153,7 +153,7 @@ function deep_copy_lexicon {
 // returns a deep copy of a list or lexicon
 function deep_copy {
 
-	parameter a.
+	parameter a.	// list or lexicon to copy
 	
 	if a:typename = "list" {
 		return deep_copy_list(a).
@@ -166,8 +166,8 @@ function deep_copy {
 // convert list to vector starting at specified index
 function list_to_vector {
 
-    parameter a.
-    parameter n.
+    parameter a.	// list to convert
+    parameter n.	// index of list to start at
 
     return v(a[n], a[n + 1], a[n + 2]).
 }
@@ -175,7 +175,7 @@ function list_to_vector {
 // converts a vector or a list of vectors and values to a list
 function vector_to_list {
 	
-	parameter a.
+	parameter a.	// vector/value or list of vectors/values to convert
 	
 	local b is list().
 	
@@ -200,7 +200,7 @@ function vector_to_list {
 // swap y and z components of a vector
 function swap_yz {
     
-    parameter a.
+    parameter a.	// vector to alter
 
     return v(a:x, a:z, a:y).
 }
@@ -208,8 +208,8 @@ function swap_yz {
 // format number to be displayed with specified precision and add thousands separator
 function format_number {
 	
-	parameter num.
-	parameter prec is 2.
+	parameter num.			// number to format
+	parameter prec is 2.	// desired precision
 	
 	set num to "" + round(num, prec).
 
@@ -244,7 +244,7 @@ function format_number {
 // format number to be displayed as a percentage
 function format_percent {
 	
-	parameter num.
+	parameter num.	// number to format
 	
 	set num to "" + round(100 * num, 1).
 
@@ -261,8 +261,8 @@ function format_percent {
 // format number to be displayed in scientific notation with specified precision
 function format_sci {
 	
-	parameter num.
-	parameter prec is 2.
+	parameter num.			// number to format
+	parameter prec is 2.	// desired precision
 	
 	local exponent is 0.
 	if num > 0 {
@@ -278,11 +278,11 @@ function format_sci {
 // format and print string to specified location
 function print_string {
 	
-	parameter string.
-	parameter col.
-	parameter line.
-	parameter size.
-	parameter alight_right is true.
+	parameter string.				// string to print
+	parameter col.					// column to print at
+	parameter line.					// line to print at
+	parameter size.					// size of print location
+	parameter alight_right is true.	// alignment
 	
 	if string:length > size {
 		set string to string:substring(0, size).
@@ -301,12 +301,12 @@ function print_string {
 // print message and crash program
 function crash {
 
+	parameter message.	// message to print
+	
 	set terminal:width to 120.
 	set terminal:height to 60.
 
-	parameter m.
-	
-	print m.
+	print message.
 	print " ".
 	print " ".
 	print " ".

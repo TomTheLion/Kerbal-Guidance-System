@@ -1,7 +1,7 @@
 @lazyglobal off.
 
 //
-// kerbal guidance system library
+// kerbal guidance system function library
 //
 
 // initialize global parameters

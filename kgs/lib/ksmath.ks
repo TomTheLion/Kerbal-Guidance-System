@@ -1,7 +1,7 @@
 @lazyglobal off.
 
 //
-// math function library
+// math library
 //
 
 // returns solution to linear system Ax=b solved by the gauss jordan algorithm
@@ -41,8 +41,7 @@ function gauss_jordan {
 		}
 	}
 
-    // elimate values above the pivots to reach reduced row echelon form, only the
-	// values in the last column are actually changed
+    // elimate values above the pivots to reach reduced row echelon form, only the values in the last column are actually changed
     for row in range(n - 1, -1)	{
 		set ab[row][n] to ab[row][n] / ab[row][row].
         for i in range(row - 1, -1) {
@@ -59,8 +58,8 @@ function gauss_jordan {
 	return x.
 }
 
-// returns solution to linear system Ax=b solved by a gauss jordan algorithm,
-// if system is overdetermined returns minimum norm solution
+// returns solution to linear system Ax=b solved by a gauss jordan algorithm, if system is overdetermined returns
+// minimum norm solution
 function matrix_solve {
 
 	parameter m.	// number of rows
@@ -180,9 +179,9 @@ function newton {
 // calculate jacobian numerically using finite difference
 function numerical_jacobian {
 
-	parameter f_function.
-	parameter x.
-	parameter p.
+	parameter f_function.	// function to generate jacobian for
+	parameter x.			// solution vector to generate jacobian around
+	parameter p.			// parameters required for function
 
 	// calculate error vector for given value of x
 	local fdf is list().
@@ -193,8 +192,7 @@ function numerical_jacobian {
 		b:add(f_output[i][f_output[i]:length - 1]).
 	}
 
-	// calculate error vector for perterbed value of x and estimate derivative using
-	// finite difference then populate jacobian
+	// calculate error vector for perterbed value of x and estimate derivative using finite difference then populate jacobian
 	for i in range(f_output:length) {
 		fdf:add(list()).
 	}
@@ -219,13 +217,13 @@ function numerical_jacobian {
 // returns solution to initial value problem with n equations using runge kutta method (4th order with 5th order error control)
 function rkf45 {
 
-    parameter df_function.
-	parameter p.
-	parameter n.
-	parameter t.
-	parameter tf.
-	parameter yi.
-	parameter settings.
+    parameter df_function.	// function that returns list of derviatives of the equations
+	parameter p.			// parameters to pass to derivative function
+	parameter n.			// number of equations
+	parameter t.			// initial time
+	parameter tf.			// final time
+	parameter yi.			// list of initial values (values can be vectors)
+	parameter settings.		// integrator settings
 	
 	local y is deep_copy(yi).
 	local steps is max(floor((tf - t) / settings:max_step), 0) + 1.
@@ -309,13 +307,13 @@ function rkf45 {
 // returns solution to initial value problem with n equations using runge kutta method (4th order)
 function rk4 {
 
-    parameter df_function.
-	parameter p.
-	parameter n.
-	parameter t.
-	parameter tf.
-	parameter yi.
-	parameter settings.
+    parameter df_function.	// function that returns list of derviatives of the equations
+	parameter p.			// parameters to pass to derivative function
+	parameter n.			// number of equations
+	parameter t.			// initial time
+	parameter tf.			// final time
+	parameter yi.			// list of initial values (values can be vectors)
+	parameter settings.		// integrator settings
 	
 	local y is deep_copy(yi).
 	local steps is max(floor((tf - t) / settings:max_step), 0) + 1.
@@ -356,13 +354,13 @@ function rk4 {
 // returns solution to initial value problem with n equations using runge kutta method (3rd order)
 function rk3 {
 
-    parameter df_function.
-	parameter p.
-	parameter n.
-	parameter t.
-	parameter tf.
-	parameter yi.
-	parameter settings.
+    parameter df_function.	// function that returns list of derviatives of the equations
+	parameter p.			// parameters to pass to derivative function
+	parameter n.			// number of equations
+	parameter t.			// initial time
+	parameter tf.			// final time
+	parameter yi.			// list of initial values (values can be vectors)
+	parameter settings.		// integrator settings
 	
 	local y is deep_copy(yi).
 	local steps is max(floor((tf - t) / settings:max_step), 0) + 1.
@@ -403,13 +401,13 @@ function rk3 {
 // returns solution to initial value problem with n equations using runge kutta method (2nd order)
 function rk2 {
 
-    parameter df_function.
-	parameter p.
-	parameter n.
-	parameter t.
-	parameter tf.
-	parameter yi.
-	parameter settings.
+    parameter df_function.	// function that returns list of derviatives of the equations
+	parameter p.			// parameters to pass to derivative function
+	parameter n.			// number of equations
+	parameter t.			// initial time
+	parameter tf.			// final time
+	parameter yi.			// list of initial values (values can be vectors)
+	parameter settings.		// integrator settings
 	
 	local y is deep_copy(yi).
 	local steps is max(floor((tf - t) / settings:max_step), 0) + 1.
@@ -449,7 +447,8 @@ function rk2 {
 
 // returns arcsin of input if it is out of bounds returns -90 or 90 degrees
 function safe_arcsin {
-    parameter a.
+
+    parameter a.	// number to take arcsin of
 
     if a > 1 {
         return 90.
@@ -464,7 +463,8 @@ function safe_arcsin {
 
 // returns arccos of input if it is out of bounds returns 0 or 180 degrees
 function safe_arccos {
-    parameter a.
+
+    parameter a.	// number to take arccos of
 
     if a > 1 {
         return 0.
