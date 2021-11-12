@@ -4,10 +4,12 @@
 // kerbal guidance system function library
 //
 
-// initialize global parameters
+// intializes global data lexicon and sets open loop guidance event trigger, inputs are first validated then open and
+// closed loop guidance parameters are set, vehicle information is parsed to build a list of the guided stages, lastly
+// timed stage events are seperated into open and closed loop events and the open loop guidance trigger is set
 function initialize {
 
-	// set data and initial flags
+	// create data lexicon and set initial flags
 	global kgs_data is lexicon(
 		"scale", lexicon(),
 		"clg", lexicon(
@@ -76,7 +78,7 @@ function initialize {
 		kgs_data:clg:add("velocity_constraint", 1).
 	}
 
-	// set mode	
+	// set guidance mode	
 	if kgs_inputs:objective:haskey("inclination") and kgs_inputs:objective:haskey("lan") {
 		kgs_data:clg:add("mode", 2).
 	}
@@ -168,14 +170,14 @@ function validate_inputs {
 // calculate time to desired node
 function time_to_node {
 
-	parameter launch_direction.
+	parameter launch_direction.	// desired launch direction (north or south)
 
 	// calculate the desired node vector
 	local k is v(0, 1, 0).
 	local node_d is solarprimevector * angleaxis(-kgs_inputs:objective:lan, k).
 
-	// calculate the angle between the projection of the ships position onto
-	// the equator and the node vector for the desired inclination
+	// calculate the angle between the projection of the ships position onto the equator and the node vector for the
+	// desired inclination
 	local side_a is ship:geoposition:lat.
 	local angle_a is kgs_inputs:objective:inclination.
 	local side_b is safe_arcsin(tan(side_a) / tan(angle_a)).
@@ -240,6 +242,7 @@ function set_launch_azimuth {
 
 	local launch_azimuth is 0.
 
+	// if inclination is specified use spherical trig to calculate the launch azimuth as a function of inclination and latitude
 	if kgs_inputs:objective:haskey("inclination") {
 		local beta_inertial is safe_arcsin(cos(kgs_inputs:objective:inclination) / cos(geoposition:lat)).
 		local vorbit is sqrt(body:mu / (body:radius + kgs_inputs:objective:altitude)).
@@ -260,7 +263,7 @@ function set_launch_azimuth {
     }
 }
 
-// initialize stage data
+// converts input vehicle data and to a list of stages that can be passed to the integrator
 function set_stages {
 
 	local g0 is 9.8067 / kgs_data:scale:acceleration.
@@ -301,24 +304,30 @@ function set_stages {
 				kgs_data:stages:add(stage_data).
 			}
 			else {
-				// otherwise create a new stage for when acceleration limit is reached
+				// otherwise create a new stage for when acceleration limit is reached, both stages will have identical information
+				// except the first part will operate under constant thrust and its final mass is set to when the acceleration would
+				// exceed the limit and the second part will be under constant acceleration and have the staging sequence
+
+				// set first part
 				local stage_data_limit is stage_data:copy.
 				stage_data:add("mass_total", vehicle_stage:mass_total).
 				stage_data:add("mass_dry", m_limit).
 				stage_data:add("mode", "c_thrust").
 				
+				// set second part
 				stage_data_limit:add("mass_total", m_limit).
 				add_keys_if(stage_data_limit, vehicle_stage, list("mass_dry", "staging_sequence", "rcs_ullage")).
 				stage_data_limit:add("a_limit", a_limit).
 				stage_data_limit:add("mode", "c_accel").
-				
 				set stage_data_limit:name to stage_data_limit:name + " (C-Accel)".
 				
+				// add stages
 				kgs_data:stages:add(stage_data).
 				kgs_data:stages:add(stage_data_limit).		
 			}	
 		}
 		else {
+			// if stage does not have a g limit add stage
 			add_keys_if(stage_data, vehicle_stage, list("mass_total", "mass_dry", "staging_sequence", "rcs_ullage")).
 			stage_data:add("mode", "c_thrust").
 			kgs_data:stages:add(stage_data).
@@ -326,7 +335,7 @@ function set_stages {
 	}
 }
 
-// set next event trigger
+// copies stage information to data lexicon and sets event trigger
 function set_olg_event_trigger {
 	local event_time is kgs_data:olg:launch_time + olg_event_ptr:value:time.
 	set kgs_data:ui:olg_event_time to event_time.
@@ -356,6 +365,7 @@ function olg_event_trigger {
         trigger_action_group(olg_event_ptr:value:group).
     }
     else if event_type = "activate guidance" {
+		// saves warp rate and cancels warp, then initializes guidance, once converged warp will be reset to original value
 		kgs_data:clg:add("warp_rate", kuniverse:timewarp:rate).
 		kuniverse:timewarp:cancelwarp.
         initialize_closed_loop_guidance().
@@ -386,7 +396,7 @@ function set_stage_trigger {
 		set kgs_data:ui:clg_event_name to kgs_data:stages[1]:name.
 	}
 
-	// pause guidance two seconds before staging, prevents guidance while stages are being removed
+	// pause guidance two seconds before staging, prevents from updating guidance while stages are being removed
 	if time:seconds > tf - 2 {
 		set kgs_data:clg:staging to true.
 	}
@@ -401,6 +411,7 @@ function set_stage_trigger {
 	// set stage triggers depending on parameters
     if kgs_data:stages[0]:haskey("staging_sequence") {
 	
+		// staging sequence
 		local n is kgs_data:stages[0]:staging_sequence:length.
 		local stage_time is tf.
 		
@@ -459,7 +470,7 @@ function set_stage_trigger {
 // triggers specified action group
 function trigger_action_group {
 	
-	parameter group_number.
+	parameter group_number.	// action group number
 	
 	if group_number = 1 {
 		ag1 on.
@@ -496,9 +507,9 @@ function trigger_action_group {
 // calculate stage burn time
 function stage_burn_time {
 
-	parameter s.
-	parameter met.
-	parameter mi.
+	parameter s.	// stage
+	parameter met.	// mission elapsed time
+	parameter mi.	// initial mass
 
 	if s:mode = "c_thrust" {
 		return (mi - s:mass_dry) / (s:thrust / s:vex).
@@ -519,14 +530,12 @@ function warp_to_launch_time {
 // function called within newton algorithm to debug
 function debug_function {
 	
-	parameter x.
-	parameter p.
-	parameter iteration.
-	parameter x_new.
-	parameter fdf.
-	parameter fmax.
-
-	// 33 and 54
+	parameter x.			// current solution vector
+	parameter p.			// params
+	parameter iteration.	// current iteration count
+	parameter x_new.		// new solution vector
+	parameter fdf.			// jacobian and error function
+	parameter fmax.			// current max error
 
 	local debug_line is 34.
 
@@ -556,7 +565,6 @@ function debug_function {
 	// print numerical and analytic jacobian and their ratio
 	if kgs_settings:debug_level > 3 {
 
-		// test numerical jacobian
 		local fdf_num is numerical_jacobian(jacobian_function@, x, p).
 
 		print_string("analytical jacobian", 0, debug_line, 130, false).
