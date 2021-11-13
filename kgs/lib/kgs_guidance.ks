@@ -85,7 +85,7 @@ function guidance {
 				set kgs_data:clg:stop_guidance to true.
 				refresh_ui().
 			}
-			else if tgo < kgs_settings:ui_refresh_rate {
+			else if tgo < 2 * kgs_settings:ui_refresh_rate {
 				set kgs_data:clg:stop_ui to true.
 			}
 		}
@@ -610,7 +610,7 @@ function jacobian_function {
 		vdot(d_rdotr_d_r, yf[8 + 3]),
 		vdot(d_rdotr_d_r, yf[10 + 3]),
 		vdot(d_rdotr_d_r, vf),
-		vdot(rf, rf) - 1
+		vdot(rf, rf) - kgs_data:clg:position_constraint
 	).
 	
 	// set velocity constraint derivative and error
@@ -634,7 +634,7 @@ function jacobian_function {
 		vdot(vf, yf[8 + 3]) + vdot(rf, yf[9 + 3]),
 		vdot(vf, yf[10 + 3]) + vdot(rf, yf[11 + 3]),
 		vdot(vf, vf) + vdot(rf, af),
-		vdot(rf, vf)
+		vdot(rf, vf) - kgs_data:clg:flight_path_angle_constraint
 	).
 
     if p:clg:mode = 0 {

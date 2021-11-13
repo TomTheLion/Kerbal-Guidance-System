@@ -56,8 +56,8 @@ function create_ui {
 	
 	// print objectives
 	print_string(format_number(kgs_inputs:objective:altitude), 29, 16, 10).
-	print_string(format_number(sqrt(kgs_data:clg:velocity_constraint) * kgs_data:scale:velocity), 29, 17, 10).
-	print_string(format_number(0), 29, 18, 10).
+	print_string(format_number(kgs_data:ui:velocity_desired), 29, 17, 10).
+	print_string(format_number(kgs_data:ui:flight_path_angle_desired), 29, 18, 10).
 	
 	if kgs_data:clg:mode > 0 {
 		print_string(format_number(kgs_inputs:objective:inclination), 29, 19, 10).
@@ -115,8 +115,8 @@ function refresh_ui {
 	
 	// calculate and print errors
 	local altitude_error is abs(a_ship - kgs_inputs:objective:altitude) / kgs_inputs:objective:altitude.
-	local velocity_error is abs(v_ship:mag / kgs_data:scale:velocity - sqrt(kgs_data:clg:velocity_constraint)).
-	local flight_path_angle_error is abs(flight_path_angle) / 90.
+	local velocity_error is abs(v_ship:mag - kgs_data:ui:velocity_desired) / kgs_data:ui:velocity_desired.
+	local flight_path_angle_error is abs(flight_path_angle - kgs_data:ui:flight_path_angle_desired) / 90.
 	
 	print_string(format_percent(altitude_error), 42, 16, 6).
 	print_string(format_percent(velocity_error), 42, 17, 6).

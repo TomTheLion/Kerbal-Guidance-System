@@ -67,16 +67,30 @@ function initialize {
 	
 	// set closed loop guidance parameters
 
-	// set velocity constraint
-	if kgs_inputs:objective:haskey("apsis") {
-		local r_alt is body:radius + kgs_inputs:objective:altitude.
-		local r_aps is body:radius + kgs_inputs:objective:apsis.
-		local vc is 2 * body:mu * r_aps / r_alt / (r_aps + r_alt).
-		kgs_data:clg:add("velocity_constraint", vc / kgs_data:scale:velocity ^ 2).
+	// set position, velocity, and flight path angle constraints
+	local r_des is body:radius + kgs_inputs:objective:altitude.
+	local r_apo is r_des.
+	local r_per is r_des.
+
+	if kgs_inputs:objective:haskey("apoapsis") {
+		set r_apo to max(r_des, body:radius + kgs_inputs:objective:apoapsis).
 	}
-	else {
-		kgs_data:clg:add("velocity_constraint", 1).
+
+	if kgs_inputs:objective:haskey("periapsis") {
+		set r_per to min(r_des, body:radius + kgs_inputs:objective:periapsis).
 	}
+
+	local sma is (r_apo + r_per) / 2.
+	local v_des is sqrt(body:mu * (2 / r_des - 1 / sma)).
+	local v_per is sqrt(body:mu * (2 / r_per - 1 / sma)).
+	local theta_des is safe_arccos(r_per * v_per / r_des / v_des).
+
+	kgs_data:clg:add("position_constraint", r_des ^ 2 / kgs_data:scale:distance ^ 2).
+	kgs_data:clg:add("velocity_constraint", v_des ^ 2 / kgs_data:scale:velocity ^ 2).
+	kgs_data:clg:add("flight_path_angle_constraint", r_des * v_des * cos(90 - theta_des) / kgs_data:scale:distance / kgs_data:scale:velocity).
+
+	kgs_data:ui:add("velocity_desired", v_des).
+	kgs_data:ui:add("flight_path_angle_desired", theta_des).
 
 	// set guidance mode	
 	if kgs_inputs:objective:haskey("inclination") and kgs_inputs:objective:haskey("lan") {

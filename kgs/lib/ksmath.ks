@@ -118,7 +118,7 @@ function newton {
     local fdf is fdf_function(x, p).
 	local n is xi:length.
 	local m is fdf:length.
-	local dx is matrix_solve(n, m, fdf).
+	local dx is matrix_solve(m, n, fdf).
 
 	// calculate max error
     local fmax is 0.
@@ -169,7 +169,7 @@ function newton {
 		}
 		else {
 			set x to x_new:copy.
-            set dx to matrix_solve(n, m, fdf).
+            set dx to matrix_solve(m, n, fdf).
 			set fmax to fmax_new.
 			set beta to min(1, 0.2 / fmax).
 		}
