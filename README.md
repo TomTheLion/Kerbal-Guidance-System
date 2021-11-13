@@ -1,6 +1,6 @@
 # Kerbal-Guidance-System
 
-Kerbal Guidance System or KGS is a program written for Kerbal Space Program in kerboscript that can guide a launch vehicle on an optimal trajectory to a desired orbit while maximizing payload. KGS offers the specification of three types of orbit specifications:
+Kerbal Guidance System or KGS is a program written for Kerbal Space Program in kerboscript that can guide a launch vehicle on an optimal trajectory to a desired orbit while maximizing payload. KGS offers the specification of three types of orbits:
 
 * Unconstrainted orbital plane
 * Constrained inclination
