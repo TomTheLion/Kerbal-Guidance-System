@@ -8,16 +8,16 @@ Kerbal Guidance System or KGS is a program written for Kerbal Space Program in k
 
 KGS allows for the specification of various parameters to define the trajectory including:
 
-* burn out altitude
-* apoapsis
-* periapsis
-* inclination
-* longitude of the ascending node
-* payload
-* coast phases
-* jettison events
-* action group triggers
-* ullage
+* Burn out altitude
+* Apoapsis
+* Periapsis
+* Inclination
+* Longitude of the ascending node
+* Payload
+* Coast phases
+* Jettison events
+* Action group triggers
+* Ullage
 
 KGS can estimate optimal launch time and launch azimuth then fly a simple trajectory during the atmospheric phase of ascent. KGS provides several options to optimize the atmospheric ascent phase including:
 
@@ -29,4 +29,6 @@ KGS can estimate optimal launch time and launch azimuth then fly a simple trajec
 * Launch azimuth adjustment
 * Launch time adjustment
 * Throttle control
+
+Please see the [guide](https://github.com/TomTheLion/Kerbal-Guidance-System/blob/main/documents/guide.md) and [examples](https://github.com/TomTheLion/Kerbal-Guidance-System/blob/main/examples/) to get a better understanding of how to use KGS.
 
