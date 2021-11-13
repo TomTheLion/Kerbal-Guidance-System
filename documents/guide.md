@@ -21,7 +21,7 @@ eps_rkf45             |              1e-5 | error tolerance if using adjustable 
 
 the KGS_Inputs lexicon is where the mission and vehicle parameters are defined, it is broken up into 2 sub-lexicons and 2 sub-lists:
 
-# KGS_Inputs:Objective
+## KGS_Inputs:Objective
 
 The objective defines the desired orbit and payload and also provides the option to save and load initial guidance solutions.
 
@@ -36,7 +36,9 @@ payload            | no        | additional mass to add to each stage, useful fo
 save_initial_guidance      | no        | if specified the converged guidance solution will be saved
 load_initial_guidance      | no        | if a previous converged guidance solution was saved, it will be loaded
 
-# KGS_Inputs:Open_loop_guidance
+## KGS_Inputs:Open_loop_guidance
+
+The open loop guidance parameters determine how the atmopsheric portion of the trajectory will be flown and allow for optimization of the launch time and azimuth.
 
 Key                    | Required? | Description
 ---                    |---        | ---
@@ -53,36 +55,32 @@ launch_direction       | no        | desired launch direction, options are north
 launch_time_adjustment | no        | value that will be added to calculated launch time for optimization
 launch_countdown       | no        | how long to wait before lift off or if lan is set how long before lift off to stop time warp
 
-# KGS_Inputs:Timed_staging
+## KGS_Inputs:Timed_staging
+
+The timed staging parameters control predefined events, event types include:
+
+Key               | Required? | Description
+---               |---        | ---
+launch            | yes       | stages vehicle (identical to stage event)
+activate guidance | yes       | initializes guidance algorithm, this event should occur when through the thickest portion of the atmopshere
+stage             | no        | stages vehicle
+throttle          | no        | changes throttle value
+action group      | no        | sets speicifed action group to on
+jettison          | no        | stages vehicle and adjustes guidance algorithm for mass removed
+coast             | no        | adds a timed stage with zero thrust
 
 Key          | Required? | Description
 ---          |---        | ---
 time         | yes       | time for event to occur
 type         | yes       | type of event
 description  | yes       | duration of pitch over manuever
-setting      | no        | maximum angle rate for pitch over maneuver, defaul is 1 deg/sec
-mass         | no        | time to begin roll maneuver
-duration     | no        | desired roll angle, defualt will align ship with launch azimuth
-group        | no        | desired booster display name
-rename       | no        | value that will be added to calculated launch azimuth for optimization
+setting      | if type = throttle | new throttle setting 
+mass         | if type = jettison | mass to be jettisoned
+duration     | if type = coast | duration of coast phase
+group        | if type = action group | action group to set to on
+rename       | no        | changes display name of booster
 
-Key          | Required? | Description
----          |---        | ---
-time         | yes       | time for event to occur
-type         | yes       | type of event
-description  | yes       | duration of pitch over manuever
-setting      | no        | maximum angle rate for pitch over maneuver, defaul is 1 deg/sec
-mass         | no        | time to begin roll maneuver
-duration     | no        | desired roll angle, defualt will align ship with launch azimuth
-group        | no        | desired booster display name
-rename       | no        | value that will be added to calculated launch azimuth for optimization
-
-
-
-
-
-
-# KGS_Inputs:Vehicle
+## KGS_Inputs:Vehicle
 
 
 
