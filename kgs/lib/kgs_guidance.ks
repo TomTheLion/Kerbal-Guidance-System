@@ -59,10 +59,10 @@ function guidance {
 			update_state().
 			update_guidance().
 
-			if kuniverse:timewarp:rate > 1 and (tgo - 5) / kuniverse:timewarp:rate < 10 {
+			until kuniverse:timewarp:rate = 1 or tgo > 10 * kuniverse:timewarp:rate + 5 {
 				set kuniverse:timewarp:rate to kuniverse:timewarp:rate - 1.
 			}
-							
+
 			if tgo < 10 {
 				set kgs_data:clg:time_prev to time:seconds.
 				set kgs_data:clg:time_final to kgs_data:clg:time_guide + kgs_data:clg:x_guide[6] * kgs_data:scale:time.
@@ -168,8 +168,10 @@ function initialize_closed_loop_guidance {
 					
 					// remove jettisoned mass from following stages
 					for i in range(stage_ptr:index + 1, kgs_data:stages:length) {
-						set kgs_data["stages"][i]["mass_total"] to kgs_data["stages"][i]["mass_total"] - event:mass.
-						set kgs_data["stages"][i]["mass_dry"] to kgs_data["stages"][i]["mass_dry"] - event:mass.
+						if not event:haskey(additional_stages) or kgs_data:stages[i]:index <= s:index + event:additional_stages {
+							set kgs_data["stages"][i]["mass_total"] to kgs_data["stages"][i]["mass_total"] - event:mass.
+							set kgs_data["stages"][i]["mass_dry"] to kgs_data["stages"][i]["mass_dry"] - event:mass.
+						}
 					}
 					
 					// add stage

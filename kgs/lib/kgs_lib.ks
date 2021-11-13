@@ -20,7 +20,8 @@ function initialize {
 			"terminal_guidance", false,
 			"stop_ui", false,
 			"stop_guidance", false,	
-			"staging", false
+			"staging", false,
+			"final_mass", 0
 		),
 		"olg", lexicon(			
 			"events", list()
@@ -304,6 +305,7 @@ function set_stages {
 		set vehicle_stage:isp to vehicle_stage:isp / kgs_data:scale:time.
 		stage_data:add("thrust", vehicle_stage:thrust * stage_data:throttle).
 		stage_data:add("vex", vehicle_stage:isp * g0).
+		stage_data:add("index", stage_ptr:index).
 		
 		// if stage has g limit split it into two stages
 		if vehicle_stage:haskey("g_limit") {
