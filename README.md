@@ -32,5 +32,5 @@ KGS can estimate optimal launch time and launch azimuth then fly a simple trajec
 
 Please see the [guide](https://github.com/TomTheLion/Kerbal-Guidance-System/blob/main/documents/guide.md) and [examples](https://github.com/TomTheLion/Kerbal-Guidance-System/blob/main/examples/) to get a better understanding of how to use KGS.
 
-If you are interested in understanding how the guidance algorithm works you can read about the theory [here](https://github.com/TomTheLion/Kerbal-Guidance-System/blob/main/documents/optimal_ascent_guidance.pdf), though the math is quite difficult.
+If you are interested in understanding how the guidance algorithm works you can read about the theory [here](https://github.com/TomTheLion/Kerbal-Guidance-System/blob/main/documents/Optimal_Ascent_Guidance.pdf), though the math is quite difficult.
 
