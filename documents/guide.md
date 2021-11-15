@@ -2,6 +2,8 @@
 
 KGS requires two lexicons to be defined, kgs_settings and kgs_inputs, prior to calling the main function.
 
+## Convergence
+
 ## Coast Phases
 
 ## KGS_Settings
