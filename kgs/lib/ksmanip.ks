@@ -102,6 +102,20 @@ function in_list {
 	return false.
 }
 
+// if all keys of lexicon are not in list crash program
+function limit_keys {
+
+	parameter a.		// lexicon to search
+	parameter b.		// list of valid keys
+	parameter message.	// optional message to append
+
+	for key in a:keys {
+		if not in_list(key, b) {
+			crash("Unknown key " + char(34) + key + char(34) + " found" + message + ".").
+		}
+	}
+}
+
 // returns a deep copy of a list
 function deep_copy_list {
 	

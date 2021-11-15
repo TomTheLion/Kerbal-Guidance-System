@@ -137,6 +137,41 @@ function initialize {
 // input validation
 function validate_inputs {
 
+	local objective_keys is list(
+		"altitude", 
+		"apoapsis", 
+		"periapsis", 
+		"inclination", 
+		"lan", 
+		"payload", 
+		"save_initial_guidance", 
+		"load_initial_guidance"
+		).
+	local open_loop_guidance_keys is list(
+		"pitch_time", 
+		"pitch_aoa", 
+		"pitch_duration", 
+		"pitch_rate", 
+		"roll_time",
+		"roll_angle",
+		"booster_name", 
+		"throttle", 
+		"azimuth_adjustment", 
+		"launch_direction", 
+		"launch_time_adjustment", 
+		"launch_countdown"
+		).
+	local vehicle_keys is list(
+		"mass_total",
+		"mass_dry",
+		"thrust",
+		"isp",
+		"name",
+		"g_limit",
+		"staging_sequence",
+		"rcs_ullage"
+	).
+
 	// validate inputs
 	require_variable(defined kgs_settings, "global variable", "kgs_settings").
 	require_variable(defined kgs_inputs, "global variable", "kgs_inputs").
@@ -149,9 +184,11 @@ function validate_inputs {
 
 	// validate objective
 	require_key(kgs_inputs:objective, "altitude", " in kgs_inputs:objective").
-	
+	limit_keys(kgs_inputs:objective, objective_keys, " in kgs_inputs:objective").
+
 	// validate open loop guidance
 	require_keys(kgs_inputs:open_loop_guidance, list("pitch_time", "pitch_aoa", "pitch_duration"), " in kgs_inputs:open_loop_guidance").
+	limit_keys(kgs_inputs:open_loop_guidance, open_loop_guidance_keys, " in kgs_inputs:open_loop_guidance").
 	
 	// validate timed staging
 	for event in kgs_inputs:timed_events {
@@ -181,6 +218,7 @@ function validate_inputs {
 	// validate vehicle
 	for vehicle_stage in kgs_inputs:vehicle {
 		require_keys(vehicle_stage, list("mass_total", "mass_dry", "thrust", "isp"), " in kgs_inputs:vehicle").
+		limit_keys(vehicle_stage, vehicle_keys, " in kgs_inputs:vehicle").
 	}
 }
 

@@ -742,8 +742,13 @@ function jacobian_function {
 function get_attitude {
 
 	// if coasting set attitude to prograde
-	if kgs_data:stages[0]:mode = "coast" and (kgs_data:stages[0]:time_end - (time:seconds - kgs_data:olg:launch_time)) > 30 {
-		return ship:prograde:vector.
+	if kgs_data:stages[0]:mode = "coast" {
+		if (kgs_data:stages[0]:time_end - (time:seconds - kgs_data:olg:launch_time)) > 30 {
+			return ship:prograde:vector.
+		}
+		if kgs_data:stages:length > 1 and kgs_data:stages[1]:mode = "coast" and (kgs_data:stages[1]:time_end - (time:seconds - kgs_data:olg:launch_time)) > 30 {
+			return ship:prograde:vector.
+		}
 	}
 	
 	local t is (time:seconds - kgs_data:clg:time_guide) / kgs_data:scale:time * constant:radtodeg.
