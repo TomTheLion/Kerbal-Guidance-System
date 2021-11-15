@@ -50,7 +50,7 @@ function guidance {
 
 		// closed loop guidance
 
-		// after guidance is initializes ship attitude and throttle are updated by the guidance trigger based on the current
+		// after guidance is initialized ship attitude and throttle are updated by the guidance trigger based on the current
 		// guidance solution, unless the vehicle is staging the state and guidance solution are continually updated until time
 		// to go reaches ten seconds, time warp rates are reduced towards the end of the trajectory
 		if not kgs_data:clg:staging and not kgs_data:clg:terminal_guidance {
@@ -82,9 +82,9 @@ function guidance {
 			// attitude and throttle are updated based on the last guidance solution, when the difference between the final time
 			// and the current time is less than the amount of time required to execute one guidance loop the throttle is locked to
 			// zero and guidance is stopped
+			set guidance_command to list(get_attitude(), get_throttle()).
 			local tgo is kgs_data:clg:time_final - (time:seconds + (time:seconds - kgs_data:clg:time_prev)).
 			set kgs_data:clg:time_prev to time:seconds.
-			set guidance_command to list(get_attitude(), get_throttle()).
 
 			if tgo < 0 {
 				lock throttle to 0.
@@ -741,25 +741,28 @@ function jacobian_function {
 // returns attitude based on last guidance solution at current time
 function get_attitude {
 
-	// if coasting set attitude to prograde
-	if kgs_data:stages[0]:mode = "coast" {
-		if (kgs_data:stages[0]:time_end - (time:seconds - kgs_data:olg:launch_time)) > 30 {
-			return ship:prograde:vector.
-		}
-		if kgs_data:stages:length > 1 and kgs_data:stages[1]:mode = "coast" and (kgs_data:stages[1]:time_end - (time:seconds - kgs_data:olg:launch_time)) > 30 {
-			return ship:prograde:vector.
-		}
-	}
-	
+	// time since the last accepted guidance solution
 	local t is (time:seconds - kgs_data:clg:time_guide) / kgs_data:scale:time * constant:radtodeg.
-	
-	// if coasting and time to next stage is less than 30 seconds, set attitude based on next stage start time
-	if kgs_data:stages[0]:mode = "coast" and (kgs_data:stages[0]:time_end - (time:seconds - kgs_data:olg:launch_time)) > 0 {
-		set t to (kgs_data:stages[0]:time_end + kgs_data:olg:launch_time - kgs_data:clg:time_guide) / kgs_data:scale:time * constant:radtodeg.
+
+	if kgs_data:stages[0]:mode = "coast" {
+		// if more than 30 seconds until the end of the coast phase set attitude to prograde
+		local time_end is kgs_data:stages[0]:time_end.
+		if kgs_data:stages:length > 1 and kgs_data:stages[1]:mode = "coast" {
+			set time_end to kgs_data:stages[1]:time_end.
+		}
+		if time_end - (time:seconds - kgs_data:olg:launch_time) > 30 {
+			return ship:prograde:vector.
+		}
+
+		// if coasting and time to next stage is less than 30 seconds, set attitude based on next stage start time
+		if time_end > 0 {
+			set t to (time_end + kgs_data:olg:launch_time - kgs_data:clg:time_guide) / kgs_data:scale:time * constant:radtodeg.
+		}
 	}
-	
+
 	local attitude is swap_yz(list_to_vector(kgs_data:clg:x_guide, 0) * cos(t) + list_to_vector(kgs_data:clg:x_guide, 3) * sin(t)):normalized.
 
+	// until guidance converges set attitude to zero angle of attack
 	if not kgs_data:clg:converged {
 		set attitude to ship:orbit:velocity:surface:normalized.
 	}

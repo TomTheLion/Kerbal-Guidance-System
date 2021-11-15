@@ -2,15 +2,25 @@
 
 KGS requires two lexicons to be defined, kgs_settings and kgs_inputs, prior to calling the main function.
 
+## Convergence and Coast Phases
+
+Achieving a converged trajectory can be a challenge. It is important that the inputs are correctly set and that the desired orbit is within the capability of the vehicle in terms of thrust, burn time, and total delta v. Another key consideration is the amount of time it takes to reach the desired altitude. In stock KSP the orbital altitudes are generally very high compared to the radius of the planet which leads to optimal trajetories incorporating coast phases. I tested a gradient dscent algorithm for finding the optimal time to start and end coast phases, however due to the low speed of the kOS processor I recommend the following approach.
+
+* set the atmopsheric ascent phase as desired
+* do not activate guidance
+* let the vehicle fly the initial part of the trajectory until the apoapsis height reaches the desired altitude
+* note the time and the time to apoapsis
+* set the coast phase to begin at the noted time and the duration to be a little bit less than the time to apoapsis
+
 ## KGS_Settings
 
 The KGS_Settings lexicon provides several options that affect the operation of the algorithm:
 
 Key                   | Recommended Value | Description
 ---                   | ---               | ---
-ipu                   |               800 | controls the speed of the kOS processor, kOS default value is not high enough
-integrator            |               rk4 | integration method for the trajectory 4 runge kutta methods are available (rk2, rk3, rk4, rkf45)
-max_step              |              0.25 | limits the maximum step size the integrator will take, lower order integrators will require a lower max step
+ipu                   |              2000 | controls the speed of the kOS processor
+integrator            |               rk4 | integration method for the trajectory, 4 runge kutta methods are available (rk2, rk3, rk4, rkf45)
+max_step              |              0.25 | limits the maximum step size the integrator will take
 eps_newton            |              1e-5 | error tolerance for the Newton's method algorithm, higher numbers will run faster but accept worse solutions
 ui_refresh_rate       |              0.25 | controls how often new ui information is displayed, lower numbers will require more cpu time
 guidance_refresh_rate |              0.25 | controls how often the ship attitude is adjusted
@@ -76,11 +86,25 @@ type         | yes       | type of event
 description  | yes       | duration of pitch over manuever
 setting      | if type = throttle | new throttle setting 
 mass         | if type = jettison | mass to be jettisoned
+additional_stages | optional if type = jettison | if mass lost does not apply to all stages specify how many additional stages to apply it to 
 duration     | if type = coast | duration of coast phase
 group        | if type = action group | action group to set to on
 rename       | no        | changes display name of booster
 
 ## KGS_Inputs:Vehicle
+
+The vehicle parameters require mass, thurst, isp information and provides several options:
+
+Key          | Required? | Description
+---          |---        | ---
+mass_total   | yes       | total mass of vehicle at beginning of stage
+mass_dry     | yes       | total mass of vehicle after stage fuel has been expended
+thrust       | yes       | thrust of the stage
+isp          | yes       | isp of the stage
+staging_sequence | if not last stage | list of stage events e.g. list(1, 1) will stage after 1 second, then after 2 seconds
+name         | no        | display name of stage
+g_limit      | no        | max acceleration in g's, if engine has min throttle make sure it will not exceed limit
+rcs_ullge    | no        | list with start and stop times e.g. list(0, 3) will start rcs when staging occurs and leave rcs acive for 3 seconds
 
 
 
