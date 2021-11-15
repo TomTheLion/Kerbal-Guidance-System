@@ -36,13 +36,15 @@ function initialize {
 	// validate inputs
 	validate_inputs().
 
-	// set newton debug function
+	// set newton's method options
 	if kgs_settings:debug_level = 0 {
 		set kgs_settings:debug_function to 0.
 	}
 	else {
 		set kgs_settings:debug_function to debug_function@.
 	}
+
+	set kgs_settings:newton_max_time to 20.
 	
 	// set dimensional scale factors
 	local d_ref is body:radius + kgs_inputs:objective:altitude.

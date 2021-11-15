@@ -2,9 +2,9 @@
 
 // global settings for kgs
 global kgs_settings is lexicon(
-	"ipu", 800,						// controls the speed of the kOS processor, kOS default value is not high enough
+	"ipu", 1000,					// controls the speed of the kOS processor, kOS default value is not high enough
 	"integrator", rk4@,				// integration method for the trajectory 4 runge kutta methods are available (rk2, rk3, rk4, rkf45)
-	"max_step", 0.25,				// limits the maximum step size the integrator will take, lower order integrators will require a lower max step
+	"max_step", 0.25,				// limits the maximum step size the integrator will take
 	"eps_newton", 1e-5,				// error tolerance for the Newton's method algorithm, higher numbers will run faster but accept worse solutions
 	"ui_refresh_rate", 0.25,		// controls how often new ui information is displayed, lower numbers will require more cpu time
 	"guidance_refresh_rate", 0.25,	// controls how often the ship attitude is adjusted

@@ -56,17 +56,23 @@ function guidance {
 		if not kgs_data:clg:staging and not kgs_data:clg:terminal_guidance {
 
 			local tgo is get_tgo().
-			update_state().
-			update_guidance().
-
-			until kuniverse:timewarp:rate = 1 or tgo > 10 * kuniverse:timewarp:rate + 5 {
+			
+			until kuniverse:timewarp:rate = 1 or tgo > 10 * kuniverse:timewarp:rate + 10 {
 				set kuniverse:timewarp:rate to kuniverse:timewarp:rate - 1.
 			}
 
+			if tgo < 30 {
+				set kgs_settings:newton_max_time to 5.
+			}
+			
 			if tgo < 10 {
 				set kgs_data:clg:time_prev to time:seconds.
 				set kgs_data:clg:time_final to kgs_data:clg:time_guide + kgs_data:clg:x_guide[6] * kgs_data:scale:time.
 				set kgs_data:clg:terminal_guidance to true.
+			}
+			else {
+				update_state().
+				update_guidance().
 			}
 		} 
 		else if kgs_data:clg:terminal_guidance {
@@ -102,10 +108,10 @@ function initialize_closed_loop_guidance {
     local v_ship is swap_yz(ship:orbit:velocity:surface) / kgs_data:scale:velocity.
 	local m_ship is ship:mass * 1000.
 		
-	// velocity to go is estimated based on the current velocity and the orbital velocity for a circular orbit (v = 1), the
-	// difference is increased by 20% to account for inefficiencies, time to go is then estimated as the amount of time
-	// required for the ship to generate an amount of delta v equal to the estimated velocity to go
-	local vgo is 1.2 * (1 - v_ship:mag).
+	// velocity to go is estimated based on the current velocity and the orbital velocity for a circular orbit (v = 1),
+	// time to go is then estimated as the amount of time required for the ship to generate an amount of delta v equal to 
+	// the estimated velocity to go
+	local vgo is 1 - ship:orbit:velocity:orbit:mag / kgs_data:scale:velocity.
 	local tgo is time_to_delta_v(kgs_data:stages, vgo, m_ship).
 	
 	// each closed loop guidance event needs to be added to the stage list and will increase the number of integration
@@ -168,7 +174,7 @@ function initialize_closed_loop_guidance {
 					
 					// remove jettisoned mass from following stages
 					for i in range(stage_ptr:index + 1, kgs_data:stages:length) {
-						if not event:haskey(additional_stages) or kgs_data:stages[i]:index <= s:index + event:additional_stages {
+						if not event:haskey("additional_stages") or kgs_data:stages[i]:index <= s:index + event:additional_stages {
 							set kgs_data["stages"][i]["mass_total"] to kgs_data["stages"][i]["mass_total"] - event:mass.
 							set kgs_data["stages"][i]["mass_dry"] to kgs_data["stages"][i]["mass_dry"] - event:mass.
 						}
@@ -242,10 +248,6 @@ function initialize_closed_loop_guidance {
 	// acceleration of 1g aligned with the velocity vector
 	local lambda is v_ship:normalized.
 	local lambda_dot is (v_ship:normalized - r_ship:normalized).
-
-	// set current guidance solution to the initial guess, if initial guidance is later loaded the ship will fly the
-	// approximately prograde trajectory until it converges
-	set kgs_data:clg:x_guide to vector_to_list(list(lambda, lambda_dot, tgo)).
 	
 	// load initial guidance if available
 	if kgs_inputs:objective:haskey("load_initial_guidance") {
@@ -257,6 +259,7 @@ function initialize_closed_loop_guidance {
 
 	// set initial guess values and guidance times
 	set kgs_data:clg:x to vector_to_list(list(lambda, lambda_dot, tgo)).
+	set kgs_data:clg:x_guide to vector_to_list(list(lambda, lambda_dot, tgo)).
     set kgs_data:clg:time to t.
 	set kgs_data:clg:time_guide to t.
     set kgs_data:clg:time_prev to t.
@@ -397,7 +400,7 @@ function update_guidance {
 	set kgs_data:clg:x to vector_to_list(list(lambda, lambda_dot, tf)).
 	
 	// solve guidance equations
-	local solution is newton(jacobian_function@, kgs_data:clg:x, kgs_data, kgs_settings:eps_newton, kgs_settings:debug_function).
+	local solution is newton(jacobian_function@, kgs_data:clg:x, kgs_data, kgs_settings:eps_newton, kgs_settings:debug_function, kgs_settings:newton_max_time).
 	
 	// update data lexicon with solution
 	set kgs_data:clg:x to solution[0].
@@ -751,6 +754,10 @@ function get_attitude {
 	}
 	
 	local attitude is swap_yz(list_to_vector(kgs_data:clg:x_guide, 0) * cos(t) + list_to_vector(kgs_data:clg:x_guide, 3) * sin(t)):normalized.
+
+	if not kgs_data:clg:converged {
+		set attitude to ship:orbit:velocity:surface:normalized.
+	}
 
 	return lookdirup(attitude, ship:up:vector * angleaxis(kgs_data:olg:roll_angle, attitude)).
 }

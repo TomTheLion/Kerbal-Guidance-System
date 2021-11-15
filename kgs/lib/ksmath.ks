@@ -111,6 +111,9 @@ function newton {
 	parameter p.					// parameters required by fdf_function
 	parameter eps.					// error tolerance
 	parameter debug_function is 0.	// function called on each iteration
+	parameter max_time is 20.		// maximum time before newton automatically exists
+
+	local t0 is time:seconds.
 
 	// calculate jacobian and error vector, then solve for solution update increment (dx)
 	local x is xi:copy.
@@ -149,7 +152,7 @@ function newton {
         if fmax < eps {
 			return list(x_new, iteration, fmax).
 		}
-		else if iteration > 19 {
+		else if time:seconds > t0 + max_time {
 			return list(x, iteration, fmax).
 		}
 
