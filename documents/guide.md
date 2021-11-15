@@ -19,8 +19,8 @@ The KGS_Settings lexicon provides several options that affect the operation of t
 Key                   | Recommended Value | Description
 ---                   | ---               | ---
 ipu                   |              2000 | controls the speed of the kOS processor, the code will run better the higher ipu you use
-integrator            |               rk4 | integration method for the trajectory 4 runge kutta methods are available (rk2, rk3, rk4, rkf45)
-max_step              |              0.25 | limits the maximum step size the integrator will take, lower order integrators will require a lower max step
+integrator            |               rk4 | integration method for the trajectory, 4 runge kutta methods are available (rk2, rk3, rk4, rkf45)
+max_step              |              0.25 | limits the maximum step size the integrator will take
 eps_newton            |              1e-5 | error tolerance for the Newton's method algorithm, higher numbers will run faster but accept worse solutions
 ui_refresh_rate       |              0.25 | controls how often new ui information is displayed, lower numbers will require more cpu time
 guidance_refresh_rate |              0.25 | controls how often the ship attitude is adjusted
