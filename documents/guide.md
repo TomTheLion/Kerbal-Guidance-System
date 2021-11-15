@@ -100,7 +100,7 @@ isp          | yes       | isp of the stage
 staging_sequence | if not last stage | list of stage events e.g. list(1, 1) will stage after 1 second, then after 2 seconds
 name         | no        | display name of stage
 g_limit      | no        | max acceleration in g's, if engine has min throttle make sure it will not exceed limit
-rcs_ullge    | no        | list with start and stop e.g. list(0, 3) will start rcs when staging occurs and leave rcs acive for 3 seconds
+rcs_ullge    | no        | list with start and stop times e.g. list(0, 3) will start rcs when staging occurs and leave rcs acive for 3 seconds
 
 
 
