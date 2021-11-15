@@ -169,7 +169,9 @@ function validate_inputs {
 		"name",
 		"g_limit",
 		"staging_sequence",
-		"rcs_ullage"
+		"rcs_ullage",
+		"throttle",
+		"min_throttle"
 	).
 
 	// validate inputs
