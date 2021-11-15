@@ -92,6 +92,9 @@ group        | if type = action group | action group to set to on
 rename       | no        | changes display name of booster
 
 ## KGS_Inputs:Vehicle
+
+The vehicle parameters require mass, thurst, isp information and provides several options:
+
 Key          | Required? | Description
 ---          |---        | ---
 mass_total   | yes       | total mass of vehicle at beginning of stage
