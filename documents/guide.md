@@ -105,6 +105,7 @@ staging_sequence | if not last stage | list of stage events e.g. list(1, 1) will
 name         | no        | display name of stage
 g_limit      | no        | max acceleration in g's, if engine has min throttle make sure it will not exceed limit
 rcs_ullge    | no        | list with start and stop times e.g. list(0, 3) will start rcs when staging occurs and leave rcs acive for 3 seconds
-
+throttle     | no        | sets desired throttle level for stage
+min throttle | no       | sets min throttle level, required if engine cannot throttle down to 0 and g limit is used
 
 
