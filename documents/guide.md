@@ -86,6 +86,7 @@ type         | yes       | type of event
 description  | yes       | duration of pitch over manuever
 setting      | if type = throttle | new throttle setting 
 mass         | if type = jettison | mass to be jettisoned
+additional_stages | optional if type = jettison | if mass lost does not apply to all stages specify how many additional stages to apply it to 
 duration     | if type = coast | duration of coast phase
 group        | if type = action group | action group to set to on
 rename       | no        | changes display name of booster
