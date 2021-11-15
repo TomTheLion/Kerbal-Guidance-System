@@ -2,6 +2,8 @@
 
 KGS requires two lexicons to be defined, kgs_settings and kgs_inputs, prior to calling the main function.
 
+## Coast Phases
+
 ## KGS_Settings
 
 The KGS_Settings lexicon provides several options that affect the operation of the algorithm:
