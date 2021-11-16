@@ -29,7 +29,9 @@ function initialize {
 		"stages", list(),
 		"ui", lexicon(
 			"status_index", 0,
-			"status_icon", list(" ", "*", "**", "***")
+			"status_icon", list(" ", "*", "**", "***"),
+			"last_time", 0,
+			"last_velocity", v(0, 0, 0)
 		)
 	).
 
@@ -323,7 +325,7 @@ function set_launch_azimuth {
 // converts input vehicle data and to a list of stages that can be passed to the integrator
 function set_stages {
 
-	local g0 is 9.8067 / kgs_data:scale:acceleration.
+	local g0 is 9.80665 / kgs_data:scale:acceleration.
 	
 	local stage_ptr is kgs_inputs:vehicle:iterator.
 	

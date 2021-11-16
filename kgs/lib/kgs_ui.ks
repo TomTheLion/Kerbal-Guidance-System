@@ -28,9 +28,9 @@ function create_ui {
 	print "| Kerbal Guidance System                    v1.0 |".
 	print "|------------------------------------------------|".
 	print "| VEHICLE STATUS                                 |".
-	print "| Mode     :                Mass   :             |".
-	print "| Tgo      :                Thrust :             |".
-	print "| Throttle :                Accel  :             |".
+	print "| Mode     :                 Mass  :             |".
+	print "| Tgo      :                 Force :             |".
+	print "| Throttle :                 Accel :             |".
 	print "|------------------------------------------------|".
 	print "| STAGE STATUS                                   |".
 	print "| Current stage :                                |".
@@ -102,19 +102,21 @@ function set_ui_trigger {
 function refresh_ui {
 
 	// get and print current state
+	local t is time:seconds.
+	local m_ship is ship:mass * 1000.
 	local r_ship is -body:position.
-	local a_ship is r_ship:mag - body:radius.
+	local alt_ship is r_ship:mag - body:radius.
 	local v_ship is ship:orbit:velocity:orbit.
 	local flight_path_angle is safe_arccos(vcrs(r_ship, v_ship):mag / r_ship:mag / v_ship:mag).
 
-	print_string(format_number(a_ship), 16, 16, 10).
+	print_string(format_number(alt_ship), 16, 16, 10).
 	print_string(format_number(v_ship:mag), 16, 17, 10).
 	print_string(format_number(flight_path_angle), 16, 18, 10).
 	print_string(format_number(ship:orbit:inclination), 16, 19, 10).
 	print_string(format_number(ship:orbit:lan), 16, 20, 10).
 	
 	// calculate and print errors
-	local altitude_error is abs(a_ship - kgs_inputs:objective:altitude) / kgs_inputs:objective:altitude.
+	local altitude_error is abs(alt_ship - kgs_inputs:objective:altitude) / kgs_inputs:objective:altitude.
 	local velocity_error is abs(v_ship:mag - kgs_data:ui:velocity_desired) / kgs_data:ui:velocity_desired.
 	local flight_path_angle_error is abs(flight_path_angle - kgs_data:ui:flight_path_angle_desired) / 90.
 	
@@ -132,11 +134,18 @@ function refresh_ui {
 		print_string(format_percent(lan_error), 42, 20, 6).
 	}
 
-	// print throttle, thrust, mass, and acceleration
-	print_string(format_percent(throttle), 13, 6, 11	).
-	print_string(format_number(ship:mass * 1000, 0), 37, 4, 10).
-	print_string(format_number(ship:availablethrust * throttle), 37, 5, 10).
-	print_string(format_number(ship:availablethrust * throttle / ship:mass), 37, 6, 10).
+	// print throttle, force, mass, and acceleration
+	local delta_time is t - kgs_data:ui:last_time.
+	set kgs_data:ui:last_time to t.
+	local rot is angleaxis(body:angularvel:mag * constant:radtodeg * delta_time, v(0, 1, 0)).
+	local a_ship is (v_ship - kgs_data:ui:last_velocity * rot) / delta_time.
+	set kgs_data:ui:last_velocity to v_ship.
+	local g_ship is -body:mu / r_ship:mag ^ 3 * r_ship.
+	local at_ship is (a_ship - g_ship):mag.
+	print_string(format_percent(throttle), 13, 6, 11).
+	print_string(format_number(m_ship, 0), 37, 4, 11).
+	print_string(format_number(m_ship * at_ship / 1000), 37, 5, 11).
+	print_string(format_number(at_ship), 37, 6, 11).
 
 	// print guidance information
 	if kgs_data:clg:active_guidance {
