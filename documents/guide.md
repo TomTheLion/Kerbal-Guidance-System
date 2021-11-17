@@ -67,7 +67,7 @@ launch_countdown       | no        | how long to wait before lift off or if lan 
 
 ## KGS_Inputs:Timed_staging
 
-The timed staging parameters control predefined events, event types include:
+KGS_Inputs:Timed_staging is a list of lexicons. The timed staging parameters control predefined events, event types include:
 
 Key               | Required? | Description
 ---               |---        | ---
@@ -93,7 +93,7 @@ rename       | no        | changes display name of booster
 
 ## KGS_Inputs:Vehicle
 
-The vehicle parameters require mass, thurst, isp information and provides several options:
+KGS_Inputs:Vehicle is a list of lexicons. The vehicle parameters require mass, thurst, isp information and provides several options:
 
 Key          | Required? | Description
 ---          |---        | ---
