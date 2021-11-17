@@ -10,6 +10,8 @@ Achieving a converged trajectory can be a challenge. It is important that the in
 * note the time and the time to apoapsis
 * set the coast phase to begin at the noted time and the duration to be a little bit less than the time to apoapsis
 
+## Required Inputs
+
 KGS requires two lexicons to be defined, kgs_settings and kgs_inputs, prior to calling the main function.
 
 ## KGS_Settings
