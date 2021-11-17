@@ -29,7 +29,7 @@ eps_rkf45             |              1e-5 | error tolerance if using adjustable 
 
 ## KGS_Inputs
 
-the KGS_Inputs lexicon is where the mission and vehicle parameters are defined, it is broken up into 2 sub-lexicons and 2 sub-lists:
+The KGS_Inputs lexicon is where the mission and vehicle parameters are defined, it is broken up into 2 sub-lexicons and 2 sub-lists:
 
 ## KGS_Inputs:Objective
 
