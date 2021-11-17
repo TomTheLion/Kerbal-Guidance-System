@@ -95,7 +95,7 @@ rename       | no        | changes display name of booster
 
 ## KGS_Inputs:Vehicle
 
-KGS_Inputs:Vehicle is a list of lexicons. The vehicle parameters require mass, thurst, isp information and provides several options:
+KGS_Inputs:Vehicle is a list of lexicons. The vehicle parameters require mass, thrust, and isp information with several optional parameters:
 
 Key          | Required? | Description
 ---          |---        | ---
