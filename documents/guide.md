@@ -1,16 +1,16 @@
 # KGS Guide
 
-KGS requires two lexicons to be defined, kgs_settings and kgs_inputs, prior to calling the main function.
-
 ## Convergence and Coast Phases
 
-Achieving a converged trajectory can be a challenge. It is important that the inputs are correctly set and that the desired orbit is within the capability of the vehicle in terms of thrust, burn time, and total delta v. Another key consideration is the amount of time it takes to reach the desired altitude. In stock KSP the orbital altitudes are generally very high compared to the radius of the planet which leads to optimal trajetories incorporating coast phases. I tested a gradient dscent algorithm for finding the optimal time to start and end coast phases, however due to the low speed of the kOS processor I recommend the following approach.
+Achieving a converged trajectory can be a challenge. It is important that the inputs are correctly set and that the desired orbit is within the capability of the vehicle in terms of thrust, burn time, and total delta v. Another key consideration is the amount of time it takes to reach the desired altitude. In stock KSP the orbital altitudes are generally very high compared to the radius of the planet which leads to optimal trajetories incorporating coast phases. I tested a gradient descent algorithm for finding the optimal time to start and end coast phases, however due to the low speed of the kOS processor I recommend the following approach.
 
 * set the atmopsheric ascent phase as desired
 * do not activate guidance
 * let the vehicle fly the initial part of the trajectory until the apoapsis height reaches the desired altitude
 * note the time and the time to apoapsis
 * set the coast phase to begin at the noted time and the duration to be a little bit less than the time to apoapsis
+
+KGS requires two lexicons to be defined, kgs_settings and kgs_inputs, prior to calling the main function.
 
 ## KGS_Settings
 
