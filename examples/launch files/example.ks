@@ -5,7 +5,7 @@ global kgs_inputs is lexicon(
 		"periapsis", 75000,
 		"inclination", 10,
 		"lan", 230,
-		"load_initial_guidance", "0:/kgs/guidance/example.json"
+		"load_initial_guidance", "0:/examples/guidance/example.json"
 	),
 	"open_loop_guidance", lexicon(
 		"pitch_time", 20,
