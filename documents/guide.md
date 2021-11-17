@@ -79,6 +79,8 @@ action group      | no        | sets speicifed action group to on
 jettison          | no        | stages vehicle and adjustes guidance algorithm for mass removed
 coast             | no        | adds a timed stage with zero thrust
 
+Each event is a lexicon with the following options for keys.
+
 Key          | Required? | Description
 ---          |---        | ---
 time         | yes       | time for event to occur
